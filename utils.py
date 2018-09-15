@@ -4,7 +4,7 @@ from main import logger
 
 
 class DatabaseUtils:
-    DB_USERNAME = "postgres"
+    DB_USERNAME = "jeronimoprogrammer"  # use 'postgres' / [your username]
     DB_PASSWORD = "coderslab"
 
     DB_HOSTNAME = "127.0.0.1"
@@ -73,7 +73,7 @@ class DatabaseUtils:
 
         try:
             for command in sql_text.split(';'):
-                if command == '': continue
+                if command == '' or command == '--': continue
                 cursor.execute(command)
                 result.append({"query": command, "result": cursor.fetchall()})
         except Exception as e:
@@ -84,7 +84,7 @@ class DatabaseUtils:
     def insert_data(cursor, table_name, source):
         for item in source:
             column_names = ", ".join(item.keys())
-            values = ', '.join("'{0}'".format(i) for i in item.values())
+            values = ', '.join("'{}'".format(i) for i in item.values())
             try:
                 cursor.execute(DatabaseUtils.QUERY_INSERT_INTO.format(table_name, column_names, values))
             except Exception as e:
