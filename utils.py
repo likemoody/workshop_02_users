@@ -1,5 +1,4 @@
 from psycopg2 import connect
-
 from main import logger
 
 
@@ -84,7 +83,7 @@ class DatabaseUtils:
     def insert_data(cursor, table_name, source):
         for item in source:
             column_names = ", ".join(item.keys())
-            values = ', '.join("'{}'".format(i) for i in item.values())
+            values = ', '.join("'{0}'".format(i) for i in item.values())
             try:
                 cursor.execute(DatabaseUtils.QUERY_INSERT_INTO.format(table_name, column_names, values))
             except Exception as e:
