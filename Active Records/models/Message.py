@@ -2,6 +2,7 @@ from utils import *
 
 class Message:
     def __init__(self):
+        # defining of start attributes (cols in table Messages)
         self.__id = -1
         self.from_id = ""
         self.to_id = ""
@@ -12,6 +13,7 @@ class Message:
     def id(self):
         return self.__id
 
+    # defining saving function
     def save_to_db(self, cursor):
         if self.__id == -1:
             sql = """INSERT INTO Messages(from_id, to_id, message_content, creation_date) VALUES(%s, %s, %s) RETURNING id"""
@@ -25,6 +27,7 @@ class Message:
             cursor.execute(sql, values)
             return True
 
+    # defining get function
     @staticmethod
     def load_sent_message(cursor, to_id):
         sql = "SELECT message_content FROM Messages WHERE to_id={};".format(to_id)
@@ -41,6 +44,7 @@ class Message:
         else:
             return None
 
+    # defining get_all function
     @staticmethod
     def load_all_sent_messages(cursor, to_id):
         sql = "SELECT message_content FROM Messages WHERE to_id={};".format(to_id)
@@ -56,6 +60,7 @@ class Message:
             ret.append(loaded_message)
         return ret
 
+    # defining delete function
     def delete(self, cursor):
         sql = "DELETE FROM Messages WHERE id=%s"
         cursor.execute(sql, (self.__id,))
