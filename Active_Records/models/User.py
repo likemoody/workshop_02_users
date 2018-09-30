@@ -1,6 +1,6 @@
 from validator import *
 from utils import *
-
+import random
 
 # Kew will commit his implementation
 
@@ -19,8 +19,9 @@ class User:
     def hashed_password(self):
         return self.__hashed_password
 
-    def set_password(self, password, salt):
-        self.__hashed_password = str(password) + str(salt)
+    def set_password(self, password):
+        salt = ''.join([random.choice('Sluchajciesiemamyiumywajcierecezmydlem') for i in range(10)])
+        self.__hashed_password = str(password) + salt
 
     def save_to_db(self, cursor):
         if self.__id == -1:
@@ -29,7 +30,7 @@ class User:
                      VALUES(%s, %s, %s) RETURNING id"""
             values = (self.username, self.email, self.hashed_password)
             cursor.execute(sql, values)
-            self.__id = cursor.fetchone()[0]  # albo cursor.fetchone()['id']
+            self.__id = cursor.fetchone()[0]  # or cursor.fetchone()['id']
             return True
         else:
             sql = """UPDATE Users SET name=%s, email=%s, hashed_password=%s WHERE id=%s"""
@@ -40,7 +41,22 @@ class User:
     @staticmethod
     def load_user_by_id(cursor, user_id):
         sql = "SELECT id, name, email, hashed_password FROM users WHERE id=%s"
-        cursor.execute(sql, (user_id,))  # (user_id, ) - bo tworzymy krotkę
+        cursor.execute(sql, (user_id,))  # (user_id, ) - creating a tuple
+        data = cursor.fetchone()
+        if data:
+            loaded_user = User()
+            loaded_user.__id = data[0]
+            loaded_user.username = data[1]
+            loaded_user.email = data[2]
+            loaded_user.__hashed_password = data[3]
+            return loaded_user
+        else:
+            return None
+
+    @staticmethod
+    def load_user_by_name(cursor, user_name):
+        sql = "SELECT id, name, email, hashed_password FROM users WHERE name=%s"
+        cursor.execute(sql, (user_name,))  # (user_id, ) - creating a tuple
         data = cursor.fetchone()
         if data:
             loaded_user = User()

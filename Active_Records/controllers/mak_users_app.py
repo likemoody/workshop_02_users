@@ -4,7 +4,17 @@ from utils import *
 
 description = '''Communication app. Please see help: -h'''
 
-def app(description):
+def app(description, db_name):
+    # RETRIEVING DATA
+    #connect to database
+    cnx = DatabaseUtils.connect_to_database(db_name)
+    crs = cnx.cursor()
+    # get all users
+    users_raw = User.load_all_users(crs)
+    crs.close()
+    cnx.close()
+
+    # PREPARING DATA
     parser = argparse.ArgumentParser(description=description)
     # adding values' containers to parser (global app container)
     parser.add_argument('-u', '--username',
@@ -29,9 +39,7 @@ def app(description):
     parser.add_argument('-e', '--edit',
                         help='edit username',
                         action='store_true')
-
     args = parser.parse_args()
-
     u = args.username
     p = args.password
     n = args.new_password
@@ -39,57 +47,64 @@ def app(description):
     d = args.delete
     e = args.edit
 
-    #connect to database
-    cnx = DatabaseUtils.connect_to_database('workshop_users_db')
-    crs = cnx.cursor()
+    user_pass_list = []
+    for user in users_raw:
+        user_pass_list.append({user.username: user.hashed_password})
 
-    # get all users
-    users_raw = User.load_all_users(crs)
+    user_list = [user.username for user in users_raw]
 
-    crs.close()
-    cnx.close()
 
-    l = True # uncomment to use "-l" flag
+    # PROCESSING DATA
+    try:
 
-    # appropriate code ahs to be writen instead of print functions
-    if u and p and e == False and d == False:
-        print(':: Check credentials >> add user or raise error')
-        # if username not in db AND password not in DB
-            # create account
-                # if password length > 8 symbols:
-                    # username = args.username
-                    # password = args.password
+        if u and p and e == False and d == False:  # scenario 1 - registration
+            if u not in user_list:
+                if len(p) >= 8:
+                    cnx = DatabaseUtils.connect_to_database(db_name)
+                    crs = cnx.cursor()
+                    new_user = User()
+                    new_user.username = u
+                    new_user.set_password(p)
+                    new_user.save_to_db(crs)
+                    crs.close()
+                    cnx.close()
+                    print('Account created')
+                else:
+                    print('Password must be 8 or more symbols long.')
+            else:
+                print('Account with such username is already registered. Please try another credentials.')
+        elif u and p and e and n:  # scenario 2 - password change
+            pass
+            # if password and username match:
+                # if new pass length > 8
+                    # password = args.new_password
                     # save_to_db()
-                    # print('Account created')
+                    # print('Password changed')
                 # else:
                     # print('Password must be 8 or more symbols long.')
-        # else:
-            # print('Account with such username is already registered. Please try another credentials.')
-    elif u and p and e and n:
-        print(':: Check credentials >> change user password to {} or show message'.format(n))
-        # if password and username match:
-            # if new pass length > 8
-                # password = args.new_password
-                # save_to_db()
-                # print('Password changed')
             # else:
-                # print('Password must be 8 or more symbols long.')
-        # else:
-            # print('Wrong credentials')
-    elif u and p and d:
-        print(':: Check credentials >> delete user or show message')
-        # if password and username match:
-            # delete account
-            # print('Account has been deleted')
-        # else:
-            # print('Wrong credentials')
-    elif l:
-        print(':: User list ::')
-        for user in users_raw:
-            print(user.username)
-    else:
-        parser.print_help()
-    return None
+                # print('Wrong credentials')
+        elif u and p and d:  # scenario 3 - account deletion
+            pass
+            # if password and username match:
+                # delete account
+                # print('Account has been deleted')
+            # else:
+                # print('Wrong credentials')
+        elif l:  # scenario 4 - get the list of users
+            print(':: User list ::')
+            for user in users_raw:
+                print(user.username)
+        else:  # scenario 5 - app ran without flags: show help
+            parser.print_help()
+        return None
+
+    except Exception as e:
+        print(e)
+    finally:
+        if cnx is not None:
+            cnx.close()
+
 
 if __name__ == "__main__":
-    app(description)
+    app(description, 'workshop_users_db')

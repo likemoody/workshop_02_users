@@ -10,7 +10,7 @@ if __name__ == '__main__':
         user_1 = User()  # create an object (empty)
         user_1.username = 'Іван Яблучко' # fill an object with data
         user_1.email = 'i.ja@mail.com'  # fill an object with data
-        user_1.set_password('somepass', 'saltie')  # fill an object with data
+        user_1.set_password('somepass')  # fill an object with data
         user_1.save_to_db(cursor)  # "save" object (transfer data from object to DB)
 
     finally:
