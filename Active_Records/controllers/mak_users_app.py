@@ -39,6 +39,8 @@ def app(description, db_name):
     parser.add_argument('-e', '--edit',
                         help='edit username',
                         action='store_true')
+    # TODO add email field
+
     args = parser.parse_args()
     u = args.username
     p = args.password
@@ -58,39 +60,69 @@ def app(description, db_name):
     try:
 
         if u and p and e == False and d == False:  # scenario 1 - registration
+            cnx = DatabaseUtils.connect_to_database(db_name)
+            crs = cnx.cursor()
             if u not in user_list:
                 if len(p) >= 8:
-                    cnx = DatabaseUtils.connect_to_database(db_name)
-                    crs = cnx.cursor()
                     new_user = User()
                     new_user.username = u
                     new_user.set_password(p)
                     new_user.save_to_db(crs)
-                    crs.close()
-                    cnx.close()
+                    # TODO add email
                     print('Account created')
                 else:
                     print('Password must be 8 or more symbols long.')
             else:
                 print('Account with such username is already registered. Please try another credentials.')
+            crs.close()
+            cnx.close()
         elif u and p and e and n:  # scenario 2 - password change
-            pass
-            # if password and username match:
-                # if new pass length > 8
-                    # password = args.new_password
-                    # save_to_db()
-                    # print('Password changed')
-                # else:
-                    # print('Password must be 8 or more symbols long.')
-            # else:
-                # print('Wrong credentials')
+            cnx = DatabaseUtils.connect_to_database(db_name)
+            crs = cnx.cursor()
+
+            # RETRIEVING DATA
+            user = User.load_user_by_name(crs, u)
+
+            # PREPARING DATA
+            password_given = p
+            password_in_db = user.hashed_password
+            password_new = n
+
+            # PROCESSING DATA
+            if password_in_db.startswith(password_given):
+                if len(password_new) >= 8:
+                    user.set_password(password_new)
+                    user.save_to_db(crs)
+                    print('Password changed')
+                else:
+                    print('Password must be 8 or more symbols long.')
+            else:
+                print('Wrong credentials')
+
+            DatabaseUtils.close_cursor(crs)
+            cnx.close()
+
         elif u and p and d:  # scenario 3 - account deletion
-            pass
-            # if password and username match:
-                # delete account
-                # print('Account has been deleted')
-            # else:
-                # print('Wrong credentials')
+            cnx = DatabaseUtils.connect_to_database(db_name)
+            crs = cnx.cursor()
+
+            # RETRIEVING DATA
+            user = User.load_user_by_name(crs, u)
+
+            # PREPARING DATA
+            password_given = p
+            password_in_db = user.hashed_password
+
+            # PROCESSING DATA
+            if password_in_db.startswith(password_given):
+                user.delete(crs)
+                print('Account for {} has been deleted.'.format(u))
+            else:
+                print('Wrong credentials')
+
+            DatabaseUtils.close_cursor(crs)
+            cnx.close()
+
         elif l:  # scenario 4 - get the list of users
             print(':: User list ::')
             for user in users_raw:
@@ -107,4 +139,4 @@ def app(description, db_name):
 
 
 if __name__ == "__main__":
-    app(description, 'workshop_users_db')
+    app(description, 'workshop_users')
