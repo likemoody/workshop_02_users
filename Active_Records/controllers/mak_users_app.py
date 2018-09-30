@@ -1,6 +1,6 @@
 import argparse
-from models.User import User
-from utils import DatabaseUtils
+from ..models.User import *
+from utils import *
 
 description = '''Communication app. Please see help: -h'''
 
