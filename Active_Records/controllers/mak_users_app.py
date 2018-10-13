@@ -29,6 +29,10 @@ def users_app(description, db_name):
                         metavar='N',
                         type=str,
                         help='new password')
+    parser.add_argument('-m', '--email',
+                        metavar='E',
+                        type=str,
+                        help='email address')
     # flags
     parser.add_argument('-l', '--list',
                         help='list of all users',
@@ -39,12 +43,13 @@ def users_app(description, db_name):
     parser.add_argument('-e', '--edit',
                         help='edit username',
                         action='store_true')
-    # TODO add email field
 
     args = parser.parse_args()
     u = args.username
     p = args.password
     n = args.new_password
+    m = args.email
+
     l = args.list
     d = args.delete
     e = args.edit
@@ -58,7 +63,6 @@ def users_app(description, db_name):
 
     # PROCESSING DATA
     try:
-
         if u and p and e == False and d == False:  # scenario 1 - registration
             cnx = DatabaseUtils.connect_to_database(db_name)
             crs = cnx.cursor()
@@ -67,8 +71,8 @@ def users_app(description, db_name):
                     new_user = User()
                     new_user.username = u
                     new_user.set_password(p)
+                    new_user.email = m
                     new_user.save_to_db(crs)
-                    # TODO add email
                     print('Account created')
                 else:
                     print('Password must be 8 or more symbols long.')
@@ -139,4 +143,4 @@ def users_app(description, db_name):
 
 
 if __name__ == "__main__":
-    app(description, 'workshop_users')
+    users_app(description, 'workshop_users')
