@@ -6,4 +6,5 @@ logging.basicConfig(level=logging.INFO)
 description = '''Communication app. Please see help: -h'''
 
 if __name__ == "__main__":
-    app(description, 'workshop_users')
+    users_app(description, 'workshop_users')  # users app
+    # messages_app(description, 'workshop_users')  # messages app

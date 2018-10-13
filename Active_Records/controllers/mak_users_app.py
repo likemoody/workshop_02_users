@@ -4,7 +4,7 @@ from utils import *
 
 description = '''Communication app. Please see help: -h'''
 
-def app(description, db_name):
+def users_app(description, db_name):
     # RETRIEVING DATA
     #connect to database
     cnx = DatabaseUtils.connect_to_database(db_name)

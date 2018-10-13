@@ -107,3 +107,4 @@ ENV/
 .idea/
 .vagrant/
 .DS_Store
+venv_ar/
