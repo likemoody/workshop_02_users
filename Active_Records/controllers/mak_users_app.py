@@ -2,7 +2,7 @@ import argparse
 from ..models.User import *
 from utils import *
 
-description = '''Communication app. Please see help: -h'''
+description = '''Users app. Please see help: -h'''
 
 def users_app(description, db_name):
     # RETRIEVING DATA
@@ -28,7 +28,7 @@ def users_app(description, db_name):
     parser.add_argument('-n', '--new_password',
                         metavar='N',
                         type=str,
-                        help='new password')
+                        help='new password (min 8 symbols)')
     parser.add_argument('-m', '--email',
                         metavar='E',
                         type=str,

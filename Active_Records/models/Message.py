@@ -60,6 +60,22 @@ class Message:
             ret.append(loaded_message)
         return ret
 
+    @staticmethod
+    def load_all_messages(cursor, order_asc_desc):
+        if order_asc_desc == "asc":
+            order = 'asc'
+        else:
+            order = 'desc'
+        sql = f"SELECT message_content, message_timestamp FROM Messages order by message_timestamp {order};"
+        ret = []
+        cursor.execute(sql)
+        for row in cursor.fetchall():
+            loaded_message = Message()
+            loaded_message.message_content = row[0]
+            loaded_message.creation_date = row[1]
+            ret.append(loaded_message)
+        return ret
+
     # defining delete function
     def delete(self, cursor):
         sql = "DELETE FROM Messages WHERE id=%s"
@@ -67,10 +83,13 @@ class Message:
         self.__id = -1
 
 
-if __name__ == '__main__':
-    cnx = DatabaseUtils.connect_to_database('workshop_users_db')
+if __name__ == '__main__':  # for testing purposes only
+    cnx = DatabaseUtils.connect_to_database('workshop_users')
     crs = cnx.cursor()
+    messages = Message.load_all_messages(crs, 'desc')
 
+    for message in messages:
+        print(message.creation_date, '::', message.message_content)
 
     crs.close()
     print('Cursor closed')
