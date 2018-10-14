@@ -1,6 +1,8 @@
 import argparse
+from datetime import datetime
+
 from ..models.User import *
-# from User import User
+from ..models.Message import *
 from utils import *
 
 description = '''Messages app. Please see help: -h'''
@@ -35,7 +37,7 @@ def messages_app(description, db_name):
     parser.add_argument('-s', '--send',
                         metavar='S',
                         type=str,
-                        help='send message of content ....')
+                        help='send message of content ... (use "" or '' to send mulitple word message)')
 
     # flags
     parser.add_argument('-l', '--list',
@@ -75,8 +77,15 @@ def messages_app(description, db_name):
             if password_in_db.startswith(password_given):
                 if t in user_list:
                     if s != '':
-                        # send message
-                        print(t, ' has sent the message')
+                        tid = 0
+                        for user in users_raw:
+                            if user.username == t: tid = user.id
+                        message = Message()
+                        message.from_id = user.id
+                        message.to_id = tid
+                        message.message_content = s
+                        message.creation_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        message.save_to_db(crs)
                         print('Message sent')
                     else:
                         print('Message field can\'t be empty')
