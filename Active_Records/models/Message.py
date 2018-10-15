@@ -16,15 +16,13 @@ class Message:
     # defining saving function
     def save_to_db(self, cursor):
         if self.__id == -1:
-            sql = """INSERT INTO Messages(from_id, to_id, message_content, creation_date) VALUES(%s, %s, %s) RETURNING id"""
-            values = (self.from_id, self.to_id, self.message_content, self.creation_date)
-            cursor.execute(sql, values)
+            sql = f"""INSERT INTO Messages(form_id, to_id, message_content, message_timestamp) VALUES({self.from_id}, {self.to_id}, '{self.message_content}', '{self.creation_date}') RETURNING id"""
+            cursor.execute(sql)
             self.__id = cursor.fetchone()[0]  # or cursor.fetchone()['id']
             return True
         else:
-            sql = """UPDATE Messages SET from_id=%s, to_id=%s, message_content=%s WHERE id=%s"""
-            values = (self.from_id, self.to_id, self.message_content, self.creation_date, self.id)
-            cursor.execute(sql, values)
+            sql = f"""UPDATE Messages SET from_id={self.from_id}, to_id={self.to_id}, message_content={self.message_content} WHERE id={self.id}"""
+            cursor.execute(sql)
             return True
 
     # defining get function
@@ -61,12 +59,12 @@ class Message:
         return ret
 
     @staticmethod
-    def load_all_messages(cursor, order_asc_desc):
+    def load_all_messages(cursor, order_asc_desc, tid):
         if order_asc_desc == "asc":
             order = 'asc'
         else:
             order = 'desc'
-        sql = f"SELECT message_content, message_timestamp FROM Messages order by message_timestamp {order};"
+        sql = f"SELECT message_content, message_timestamp FROM Messages WHERE to_id={tid} order by message_timestamp {order};"
         ret = []
         cursor.execute(sql)
         for row in cursor.fetchall():

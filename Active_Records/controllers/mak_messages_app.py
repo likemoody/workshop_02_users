@@ -69,12 +69,18 @@ def messages_app(description, db_name):
             # RETRIEVING DATA
             user = User.load_user_by_name(crs, u)
 
-            # PREPARING DATA
-            password_given = p
-            password_in_db = user.hashed_password
+            password_given = None
+            password_in_db = None
+
+            if user:
+                # PREPARING DATA
+                password_given = p
+                password_in_db = user.hashed_password
+            else:
+                u = None
 
             # PROCESSING DATA
-            if password_in_db.startswith(password_given):
+            if u and password_in_db.startswith(password_given):
                 if t in user_list:
                     if s != '':
                         tid = 0
@@ -96,36 +102,42 @@ def messages_app(description, db_name):
 
             DatabaseUtils.close_cursor(crs)
             cnx.close()
-        else:
-            print('YAAAAY!')
-        # elif u and p and d:  # scenario 3 - account deletion
-        #     cnx = DatabaseUtils.connect_to_database(db_name)
-        #     crs = cnx.cursor()
-        #
-        #     # RETRIEVING DATA
-        #     user = User.load_user_by_name(crs, u)
-        #
-        #     # PREPARING DATA
-        #     password_given = p
-        #     password_in_db = user.hashed_password
-        #
-        #     # PROCESSING DATA
-        #     if password_in_db.startswith(password_given):
-        #         user.delete(crs)
-        #         print('Account for {} has been deleted.'.format(u))
-        #     else:
-        #         print('Wrong credentials')
-        #
-        #     DatabaseUtils.close_cursor(crs)
-        #     cnx.close()
-        #
-        # elif l:  # scenario 4 - get the list of users
-        #     print(':: User list ::')
-        #     for user in users_raw:
-        #         print(user.username)
-        # else:  # scenario 5 - app ran without flags: show help
-        #     parser.print_help()
-        # return None
+
+        elif u and p and l:  # scenario 2 - list all messages
+            cnx = DatabaseUtils.connect_to_database(db_name)
+            crs = cnx.cursor()
+
+            # RETRIEVING DATA
+            user = User.load_user_by_name(crs, u)
+
+            password_given = None
+            password_in_db = None
+
+            if user:
+                # PREPARING DATA
+                password_given = p
+                password_in_db = user.hashed_password
+            else:
+                u = None
+
+            # PROCESSING DATA
+            if u and password_in_db.startswith(password_given):
+                messages = Message.load_all_messages(crs, 'desc', user.id)
+                print('\n-------------------\nMessages received:', len(messages))
+                for message in messages:
+                    print(message.creation_date, message.message_content)
+                print('-------------------\n')
+            else:
+                print('Wrong credentials')
+
+            DatabaseUtils.close_cursor(crs)
+            cnx.close()
+
+        else:  # scenario 3 - app ran without flags: show help
+            parser.print_help()
+        return None
+
+
 
     except Exception as e:
         print(e)
